@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    .visible-tab {
+        letter-spacing: 1px;
+        box-sizing: border-box;
+        transform: scale3d(1, 1, 1) !important;
+        position: absolute;
+        top: 60px;
+        width: 620px;
+        height: 320px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #eee;
+        transition: transform .3s;
+        z-index: 2;
+        right: 0;
+        overflow: hidden;
+        transform-origin: right;
+    }
+
+    textarea {
+        letter-spacing: 1px;
+        box-sizing: border-box;
+        resize: none;
+        outline: none;
+        font-family: akrobatL;
+        text-shadow: 0 0 0 #000;
+        padding: 0 40px 0 5px;
+        clip-path: polygon(0 0, calc(100% - 15px) 0, calc(100% - 15px) 100%, 0 100%);
+        line-height: 30px;
+        font-size: 22px;
+        word-spacing: 5px;
+        text-align: justify;
+        background-color: #eee;
+        width: calc(100% + 15px);
+        height: 320px;
+        border: 1px solid #f00;
+    }
+
+    #append::-webkit-scrollbar-thumb {
+        background-color: #666;
+    }
+
+    #append::-webkit-scrollbar-track {
+        background-color: #999;
+    }
+
+    #append::-webkit-scrollbar {
+        width: 25px;
+    }
+
+    .txt-up {
+        letter-spacing: 1px;
+        box-sizing: border-box;
+        position: absolute;
+        width: 24px;
+        height: 70px;
+        display: none;
+        padding: 0;
+        cursor: pointer;
+        outline: none;
+        border: 1px solid #c6284f;
+        background-color: #c6284f;
+        transition: .2s;
+        z-index: 2;
+        border-bottom: 1px solid #323843;
+        left: calc(100% - 24px);
+        top: 0;
+    }
+
+    .txt-down {
+        letter-spacing: 1px;
+        box-sizing: border-box;
+        position: absolute;
+        width: 24px;
+        height: 70px;
+        display: none;
+        padding: 0;
+        cursor: pointer;
+        outline: none;
+        border: 1px solid #c6284f;
+        background-color: #c6284f;
+        transition: .2s;
+        z-index: 2;
+        border-top: 1px solid #323843;
+        left: calc(100% - 24px);
+        bottom: 4px;
+    }
+
+    .txt-before {
+        letter-spacing: 1px;
+        box-sizing: border-box;
+        position: absolute;
+        top: 0;
+        width: 1px;
+        height: 140px;
+        transform-origin: top;
+        background-color: #c6284f;
+        left: initial;
+        right: 0;
+        display: none;
+        transform: none;
+        transition: none;
+    }
+</style>
+
+<body>
+    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+    <div id="tab-2" class="hidden-tab visible-tab smooth">
+        <textarea class="parse-data" name="append" id="append"
+            placeholder="спи­сок чи­сел для фор­ми­ро­ва­ния ге­не­ра­ции">
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, qu Lorem ipsum dolor sit amet consectetur adipisicing elit. Consequuntur explicabo veniam numquam commodi saepe aliquid eius autem voluptates perspiciatis ab modi quas doloremque nisi adipisci, officiis odit sit excepturi. Beatae?Lorem ipsum, dolor sit amet consectetur adipisicing elit. Assumenda, a perferendis iste aspernatur minus dolorem amet enim repudiandae nobis in odio quidem perspiciatis facere dolore esse sequi dicta mollitia eveniet?
+        </textarea>
+        <button class="txt-up" title="Прокрутить поле ввода вверх"></button>
+        <button class="txt-down" title="Прокрутить поле ввода вниз"></button>
+        <div class="txt-before"></div>
+    </div>
+</body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+<script>
+    var stopScrolled = false;
+    let delta, speedScroll, inertiaScroll, smoothScroll, smoothScroll_area;
+
+    const isWindowsDesktop = navigator.userAgent.toLowerCase().indexOf('windows') != -1;
+    if (isWindowsDesktop) {
+        speedScroll = 50;
+        inertiaScroll = 30;
+    } else {
+        speedScroll = 10;
+        inertiaScroll = 30;
+    };
+
+    function init() {
+        smoothScroll_area = new SmoothScroll_area(document.getElementById('append'), speedScroll, inertiaScroll);
+        smoothScroll = new SmoothScroll(document, speedScroll, inertiaScroll);
+    };
+
+    function SmoothScroll(target, speed, smooth) {
+        if (target == document) {
+            target = document.scrollingElement || document.documentElement || document.body.parentNode || document.body;
+        }
+
+        let lastY,
+            interval = false,
+            moving = false,
+            pos = target.scrollTop,
+            frame = target === document.body && document.documentElement ? document.documentElement : target;
+
+        target.addEventListener('wheel', scrolled, { passive: false });
+        target.addEventListener('touchmove', scrolledTouch, { passive: false });
+        target.addEventListener('touchstart', function (e) { lastY = e.touches[0].pageY; }, { passive: false });
+
+        interval = false;
+        initInterval();
+
+        function setNewPositionAndMoving(e, delta) {
+            pos += -delta * speed;
+            pos = Math.max(0, Math.min(pos, target.scrollHeight - frame.clientHeight));
+            if (!moving) {
+                update(e);
+            };
+        }
+
+        function scrolled(e) {
+            function normalizeWheelDelta(e) {
+                if (e.detail) {
+                    if (e.wheelDelta) {
+                        return (e.wheelDelta / e.detail / 40) * (e.detail > 0 ? 1 : -1);
+                    }
+                    return -e.detail / 3;
+                }
+                return e.wheelDelta / 120;
+            };
+
+            e.preventDefault();
+            setNewPositionAndMoving(e, normalizeWheelDelta(e));
+        };
+
+        function scrolledTouch(e) {
+            function getTouchDelta(e) {
+                const currentY = e.touches[0].pageY;
+                const deltaY = currentY - lastY;
+                lastY = currentY;
+                return deltaY / 2;
+            };
+
+            e.preventDefault();
+            setNewPositionAndMoving(e, getTouchDelta(e));
+        };
+
+
+        function update(e) {
+            stopInterval();
+
+            moving = true;
+            delta = (pos - target.scrollTop) / smooth;
+
+            if (Math.abs(delta) < 1) {
+                delta = delta < 0 ? -1 : 1;
+            };
+
+            if (stopScrolled == true) {
+                if (typeof (e) != 'number' && e.target.tagName == 'TEXTAREA') {
+                    moving = true;
+                    let nextScroll = e.target.scrollTop + Math.round(delta);
+                    if (nextScroll < 1)
+                        nextScroll = 1;
+                    if (nextScroll == e.target.scrollTopMax)
+                        nextScroll = e.target.scrollTopMax - 1;
+
+                    e.target.scrollTop = nextScroll;
+                    e.stopPropagation();
+                }
+
+                delta = 0;
+                moving = false;
+                initInterval();
+                return;
+            };
+
+            if (Math.abs(delta) > 0 && Math.abs(pos - target.scrollTop) < 2) {
+                target.scrollTop = pos;
+                moving = false;
+                initInterval();
+                return;
+            };
+
+            target.scrollTop += Math.round(delta);
+            requestFrame(update, e);
+        };
+
+        function scrollTo(y) {
+            pos = y;
+            if (!moving) {
+                requestFrame(update, 0);
+            };
+        };
+
+        let requestFrame = (function () {
+            return (window.requestAnimationFrame || window.webkitRequestAnimationFrame ||
+                window.mozRequestAnimationFrame || window.oRequestAnimationFrame ||
+                window.msRequestAnimationFrame ||
+                function (func, e) {
+                    window.setTimeout(func, 1000 / 50);
+                });
+        })();
+
+        function initInterval() {
+            if (interval !== false)
+                return;
+
+            interval = setInterval(function () {
+                if (pos !== target.scrollTop) {
+                    pos = target.scrollTop;
+                };
+            }, 100);
+        };
+
+        function stopInterval() {
+            clearInterval(interval);
+            interval = false;
+        };
+
+        $('#append').hover(
+            function () {
+                target = 0
+                pos = 0
+            }
+        )
+
+        document.body.onmouseover = function(ev){
+            var elm = ev.target || ev.srcElement;
+            if(elm === document.getElementById('append')){
+                target = 0
+                pos = 0
+            }else{
+                SmoothScroll(document, speedScroll, inertiaScroll)
+            }
+        };
+
+        return { scrollTo };
+    };
+
+    function SmoothScroll_area(target, speed, smooth) {
+        let lastY,
+            interval = false,
+            moving = false,
+            pos = target.scrollTop,
+            frame = target === document.body && document.documentElement ? document.documentElement : target;
+
+        target.addEventListener('wheel', scrolled, { passive: false });
+        target.addEventListener('touchmove', scrolledTouch, { passive: false });
+        target.addEventListener('touchstart', function (e) { lastY = e.touches[0].pageY; }, { passive: false });
+
+        interval = false;
+        initInterval();
+
+        function setNewPositionAndMoving(e, delta) {
+            pos += -delta * speed;
+            pos = Math.max(0, Math.min(pos, target.scrollHeight - frame.clientHeight));
+            if (!moving) {
+                update(e);
+            };
+        }
+
+        function scrolled(e) {
+            function normalizeWheelDelta(e) {
+                if (e.detail) {
+                    if (e.wheelDelta) {
+                        return (e.wheelDelta / e.detail / 40) * (e.detail > 0 ? 1 : -1);
+                    }
+                    return -e.detail / 3;
+                }
+                return e.wheelDelta / 120;
+            };
+
+            e.preventDefault();
+            setNewPositionAndMoving(e, normalizeWheelDelta(e));
+        };
+
+        function scrolledTouch(e) {
+            function getTouchDelta(e) {
+                const currentY = e.touches[0].pageY;
+                const deltaY = currentY - lastY;
+                lastY = currentY;
+                return deltaY / 2;
+            };
+
+            e.preventDefault();
+            setNewPositionAndMoving(e, getTouchDelta(e));
+        };
+
+
+        function update(e) {
+            stopInterval();
+
+            moving = true;
+            delta = (pos - target.scrollTop) / smooth;
+
+            if (Math.abs(delta) < 1) {
+                delta = delta < 0 ? -1 : 1;
+            };
+
+            if (stopScrolled == true) {
+                if (typeof (e) != 'number' && e.target.tagName == 'TEXTAREA') {
+                    moving = true;
+                    let nextScroll = e.target.scrollTop + Math.round(delta);
+                    if (nextScroll < 1)
+                        nextScroll = 1;
+                    if (nextScroll == e.target.scrollTopMax)
+                        nextScroll = e.target.scrollTopMax - 1;
+
+                    e.target.scrollTop = nextScroll;
+                    e.stopPropagation();
+                }
+
+                delta = 0;
+                moving = false;
+                initInterval();
+                return;
+            };
+
+            if (Math.abs(delta) > 0 && Math.abs(pos - target.scrollTop) < 2) {
+                target.scrollTop = pos;
+                moving = false;
+                initInterval();
+                return;
+            };
+
+            target.scrollTop += Math.round(delta);
+            requestFrame(update, e);
+        };
+
+        function scrollTo(y) {
+            pos = y;
+            if (!moving) {
+                requestFrame(update, 0);
+            };
+        };
+
+        let requestFrame = (function () {
+            return (window.requestAnimationFrame || window.webkitRequestAnimationFrame ||
+                window.mozRequestAnimationFrame || window.oRequestAnimationFrame ||
+                window.msRequestAnimationFrame ||
+                function (func, e) {
+                    window.setTimeout(func, 1000 / 50);
+                });
+        })();
+
+        function initInterval() {
+            if (interval !== false)
+                return;
+
+            interval = setInterval(function () {
+                if (pos !== target.scrollTop) {
+                    pos = target.scrollTop;
+                };
+            }, 100);
+        };
+
+        function stopInterval() {
+            clearInterval(interval);
+            interval = false;
+        };
+
+        return { scrollTo };
+    };
+
+    window.addEventListener('DOMContentLoaded', init);
+</script>
+
+</html>
